@@ -191,7 +191,9 @@ class Instructor:
                         self.opt.pretrained_model_name, self.opt.max_seq_len,
                     )
 
-            if self.opt.model_name in ["aen_bert", "spc_bert", "lcf_bert", "fx_bert"]:
+            if not os.path.isdir(self.opt.pretrained_model_name):
+                pretrained_model = torch.hub.load('huggingface/transformers', 'model', self.opt.pretrained_model_name)
+            elif self.opt.model_name in ["aen_bert", "spc_bert", "lcf_bert", "fx_bert"]:
                 pretrained_model = BertModel.from_pretrained(
                     self.opt.pretrained_model_name, output_hidden_states=True
                 )
@@ -845,9 +847,13 @@ def prepare_and_start_instructur(opt):
                 opt.model_name
             ]
     else:
-        opt.pretrained_model_name = os.path.join(
+        path = os.path.join(
             opt.base_path, "pretrained_models", opt.pretrained_model_name
         )
+        if os.path.isdir(path):
+            opt.pretrained_model_name = path
+        else:
+            logger.info("arg: no model found at {}, falling back to models published on Hugging Face")
 
     if opt.state_dict and opt.state_dict not in ["None", "pretrained"]:
         opt.state_dict = os.path.join(

@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import torch
+import smart_open
+smart_open.open = smart_open.smart_open
 from gensim.models import KeyedVectors
 from newstsc.embeddings.glove import gensim_path, pickle_path
 from pytorch_transformers import BertTokenizer, DistilBertTokenizer, RobertaTokenizer

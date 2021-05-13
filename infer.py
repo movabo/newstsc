@@ -79,7 +79,7 @@ class TargetSentimentClassifier:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', default='lcf_bert', type=str)
-    parser.add_argument('--pretrained_model_name', type=str, default='bert_news_ccnc_10mio_3ep',
+    parser.add_argument('--pretrained_model_name', type=str, default='fhamborg/GRU-TSC',
                         help='has to be placed in folder pretrained_models')
     parser.add_argument('--state_dict', type=str, default='pretrained', help="will download default model if 'pretrained'")
     parser.add_argument('--device', default=None, type=str,
