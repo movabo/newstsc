@@ -11,6 +11,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_transformers.modeling_bert import BertPooler, BertSelfAttention
+from typing import Any
+from torch.hub import load_state_dict_from_url
+
+
+__all__ = ['LCF_BERT', 'lcf_bert']
+
+
+PRETRAINED_URL = 'https://github.com/movabo/newstsc/releases/download/v0.0.1/lcf_bert_newstsc_val_recall_avg_0.5954_epoch3.pth'
 
 
 class GlobalContext(nn.Module):
@@ -201,3 +209,16 @@ class LCF_BERT(nn.Module):
         # otherwise return the pooled output, since it seems to be a proper representation of LCF's output
         else:
             return pooled_out
+
+
+def lcf_bert(*args: Any, **kwargs: Any) -> LCF_BERT:
+    pretrained = kwargs.pop("pretrained", False)
+    progress = kwargs.pop("progress", True)
+    map_location = kwargs.pop("map_location", True)
+    model = LCF_BERT(*args, **kwargs)
+    if pretrained:
+        state_dict = load_state_dict_from_url(PRETRAINED_URL,
+                                              progress=progress,
+                                              map_location=map_location)
+        model.load_state_dict(state_dict)
+    return model

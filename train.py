@@ -29,7 +29,7 @@ from newstsc.earlystopping import EarlyStopping
 from newstsc.evaluator import Evaluator
 from newstsc.fxlogger import get_logger
 from newstsc.models.aen import AEN_Base
-from newstsc.models.lcf import LCF_BERT
+from newstsc.models.lcf import lcf_bert
 from newstsc.models.ram import RAM
 from newstsc.models.spc import SPC_Base
 from newstsc.models.globalsenti import Global_LCF
@@ -204,11 +204,25 @@ class Instructor:
                     self.opt.pretrained_model_name, output_hidden_states=True
                 )
 
-            self.model = self.opt.model_class(pretrained_model, self.opt).to(
-                self.opt.device
-            )
+            if self.opt.state_dict == "pretrained":
+                try:
+                    self.model = self.opt.model_class(
+                        pretrained_model,
+                        self.opt,
+                        pretrained=self.opt.state_dict == "pretrained",
+                        map_location=self.opt.device
+                    ).to(self.opt.device)
+                except TypeError as e:
+                    logger.error("The selected model does not support the 'pretrained'-keyword for state_dict")
+                    exit(1)
+            else:
+                self.model = self.opt.model_class(
+                    pretrained_model,
+                    self.opt
+                ).to(self.opt.device)
 
-            if self.opt.state_dict:
+
+            if self.opt.state_dict and self.opt.state_dict != "pretrained":
                 # load weights from the state_dict
                 logger.info(f"loading weights from {self.opt.state_dict}")
                 self.model.load_state_dict(
@@ -740,7 +754,7 @@ def prepare_and_start_instructur(opt):
         "spc_distilbert": SPC_Base,
         "spc_roberta": SPC_Base,
         # LCF
-        "lcf_bert": LCF_BERT,
+        "lcf_bert": lcf_bert,
     }
     model_name_to_pretrained_model_name = {
         "global_lcf": "bert-base-uncased",
@@ -835,11 +849,11 @@ def prepare_and_start_instructur(opt):
             opt.base_path, "pretrained_models", opt.pretrained_model_name
         )
 
-    if opt.state_dict and opt.state_dict != "None":
+    if opt.state_dict and opt.state_dict not in ["None", "pretrained"]:
         opt.state_dict = os.path.join(
             opt.base_path, "pretrained_models", "state_dicts", opt.state_dict
         )
-    else:
+    elif opt.state_dict != "pretrained":
         opt.state_dict = None
 
     if not opt.experiment_path:
@@ -1031,7 +1045,7 @@ def parse_arguments(override_args=False):
         default=None,
         help="has to be placed in folder pretrained_models",
     )
-    parser.add_argument("--state_dict", type=str, default=None)
+    parser.add_argument("--state_dict", type=str, default=None, help="will download default model if 'pretrained'")
     parser.add_argument(
         "--use_global_context", type=str2bool, nargs="?", const=True, default=False
     )

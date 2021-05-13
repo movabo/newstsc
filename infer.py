@@ -81,7 +81,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_name', default='lcf_bert', type=str)
     parser.add_argument('--pretrained_model_name', type=str, default='bert_news_ccnc_10mio_3ep',
                         help='has to be placed in folder pretrained_models')
-    parser.add_argument('--state_dict', type=str, default='lcf_bert_newstsc_val_recall_avg_0.5954_epoch3')
+    parser.add_argument('--state_dict', type=str, default='pretrained', help="will download default model if 'pretrained'")
     parser.add_argument('--device', default=None, type=str,
                         help='e.g., cuda:0; if None: any CUDA device will be used if available, else CPU')
 
